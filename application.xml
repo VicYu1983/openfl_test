@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	<!-- NMML reference: https://gist.github.com/1763850 -->
+	
+	<!-- metadata, make sure 'package' is at least 3 segments (ie. com.mycompany.myproject) -->
+	<meta title="TestOpenFL3" package="TestOpenFL3" version="1.0.0" company="vic" />
+	
+	<!-- output -->
+	<app main="Main" file="TestOpenFL3" path="bin" />
+	
+	<window background="#000000" fps="60" />
+	<window width="800" height="480" unless="mobile" />
+	<window orientation="landscape" vsync="false" antialiasing="0" if="cpp" />
+	
+	<!-- classpath, haxe libs -->
+	<source path="src" />
+	<source path="lib/box2d" />
+	<source path="lib/vic" />
+	<source path="lib/underscore" />
+	
+	<haxelib name="stablexui" />
+	<haxelib name="away3d" />
+    <haxelib name="openfl" />
+    <haxelib name="actuate" />
+	<haxelib name="hscript" />
+    <haxelib name="haxeui" />
+    <haxelib name="box2d" />
+    <haxelib name="swf" />
+    <haxelib name="async" />
+	
+	<!-- assets -->
+	<icon path="assets/openfl.svg" />
+	<assets path="assets/img" rename="img" />
+	<library id="swfsrc" path="assets/abc.swf"></library>
+	
+	<!-- optimize output
+	<haxeflag name="-dce full" /> -->
+	
+	<!-- 如果要在html跑away3d的話要加以下兩行 -->
+	<!--
+	<haxedef name="source-map-content" if="html5" />
+    <haxedef name="dom" if="html5" />
+	-->
+</project>

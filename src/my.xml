@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<VBox w="100" h="200">
+    <Text id="'txt'" text="'Hello, world!'" />
+	<Button text="'Hello, world!'"></Button>
+</VBox>
