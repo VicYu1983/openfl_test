@@ -2,7 +2,7 @@
 <project version="2">
   <!-- Output SWF options -->
   <output>
-    <movie outputType="Application" />
+    <movie outputType="CustomBuild" />
     <movie input="" />
     <movie path="application.xml" />
     <movie fps="60" />
@@ -16,29 +16,30 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="C:\HaxeToolkit\haxe\lib\stablexui\1,1,4\src" />
-    <class path="C:\HaxeToolkit\haxe\lib\actuate\1,7,2" />
+    <class path="C:\HaxeToolkit\haxe\lib\stablexui\1,1,5\src" />
+    <class path="C:\HaxeToolkit\haxe\lib\actuate\1,8,6" />
     <class path="C:\HaxeToolkit\haxe\lib\away3d\1,1,0" />
     <class path="C:\HaxeToolkit\haxe\lib\openfl\2,2,4" />
-    <class path="C:\HaxeToolkit\haxe\lib\lime\2,4,1" />
+    <class path="C:\HaxeToolkit\haxe\lib\lime\2,4,7" />
     <class path="C:\HaxeToolkit\haxe\lib\haxeui\1,7,13" />
     <class path="C:\HaxeToolkit\haxe\lib\hscript\2,0,4" />
     <class path="C:\HaxeToolkit\haxe\lib\svg\1,0,8" />
-    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,0,3" />
+    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,0,6" />
     <class path="C:\HaxeToolkit\haxe\lib\actuate\1,8,3" />
     <class path="C:\HaxeToolkit\haxe\lib\yagp\1,1,4" />
-    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,0,6" />
+    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,1,1" />
     <class path="C:\HaxeToolkit\haxe\lib\box2d\1,2,3" />
-    <class path="C:\HaxeToolkit\haxe\lib\swf\1,8,7" />
+    <class path="C:\HaxeToolkit\haxe\lib\swf\1,8,9" />
+    <class path="C:\HaxeToolkit\haxe\lib\async\0,3,0" />
     <class path="src" />
     <class path="lib\box2d" />
     <class path="lib\vic" />
-    <class path="bin\flash\haxe" />
     <class path="lib\underscore" />
+    <class path="bin\flash\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="stablexui=1.1.4&#xA;actuate=1.7.2&#xA;away3d=1.1.0&#xA;openfl=2.2.4&#xA;lime=2.4.1&#xA;haxeui=1.7.13&#xA;hscript=2.0.4&#xA;svg=1.0.8&#xA;openfl=3.0.3&#xA;actuate=1.8.3&#xA;yagp=1.1.4&#xA;openfl=3.0.6&#xA;box2d=1.2.3&#xA;swf=1.8.7&#xA;openfl-next&#xA;tools=2.4.1&#xA;no-compilation&#xA;openfl-flash&#xA;web" />
+    <option directives="stablexui=1.1.5&#xA;actuate=1.8.6&#xA;away3d=1.1.0&#xA;openfl=2.2.4&#xA;lime=2.4.7&#xA;haxeui=1.7.13&#xA;hscript=2.0.4&#xA;svg=1.0.8&#xA;openfl=3.0.6&#xA;actuate=1.8.3&#xA;yagp=1.1.4&#xA;openfl=3.1.1&#xA;box2d=1.2.3&#xA;swf=1.8.9&#xA;async=0.3.0&#xA;openfl-next&#xA;tools=2.4.7&#xA;no-compilation&#xA;openfl-flash&#xA;web" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
@@ -58,7 +59,7 @@
     <hidden path="obj" />
   </hiddenPaths>
   <!-- Executed before build -->
-  <preBuildCommand />
+  <preBuildCommand>"$(CompilerPath)/haxelib" run lime build "$(OutputFile)" $(TargetBuild) -$(BuildConfig) -Dfdb</preBuildCommand>
   <!-- Executed after build -->
   <postBuildCommand alwaysRun="False" />
   <!-- Other project options -->
