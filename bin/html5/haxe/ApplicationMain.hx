@@ -1,7 +1,9 @@
 #if !macro
 
 
+@:access(lime.app.Application)
 @:access(lime.Assets)
+@:access(openfl.display.Stage)
 
 
 class ApplicationMain {
@@ -13,20 +15,14 @@ class ApplicationMain {
 	
 	public static function create ():Void {
 		
-		var app = new lime.app.Application ();
+		var app = new openfl.display.Application ();
 		app.create (config);
-		openfl.Lib.application = app;
-		
-		#if !flash
-		var stage = new openfl.display.Stage (app.window.width, app.window.height, config.background);
-		stage.addChild (openfl.Lib.current);
-		app.addModule (stage);
-		#end
 		
 		var display = new NMEPreloader ();
 		
 		preloader = new openfl.display.Preloader (display);
-		preloader.onComplete = init;
+		app.setPreloader (preloader);
+		preloader.onComplete.add (init);
 		preloader.create (config);
 		
 		#if (js && html5)
@@ -641,7 +637,7 @@ class ApplicationMain {
 		
 		
 		
-		if (loaded == total) {
+		if (total == 0) {
 			
 			start ();
 			
@@ -654,26 +650,45 @@ class ApplicationMain {
 		
 		config = {
 			
-			antialiasing: Std.int (0),
-			background: Std.int (0),
-			borderless: false,
+			build: "333",
 			company: "vic",
-			depthBuffer: false,
 			file: "TestOpenFL3",
-			fps: Std.int (60),
-			fullscreen: false,
-			hardware: true,
-			height: Std.int (480),
+			fps: 60,
+			name: "TestOpenFL3",
 			orientation: "",
 			packageName: "TestOpenFL3",
-			resizable: true,
-			stencilBuffer: true,
-			title: "TestOpenFL3",
 			version: "1.0.0",
-			vsync: false,
-			width: Std.int (800),
+			windows: [
+				
+				{
+					antialiasing: 0,
+					background: 0,
+					borderless: false,
+					depthBuffer: false,
+					display: 0,
+					fullscreen: false,
+					hardware: true,
+					height: 480,
+					parameters: "{}",
+					resizable: true,
+					stencilBuffer: true,
+					title: "TestOpenFL3",
+					vsync: false,
+					width: 800,
+					x: null,
+					y: null
+				},
+			]
 			
-		}
+		};
+		
+		#if hxtelemetry
+		var telemetry = new hxtelemetry.HxTelemetry.Config ();
+		telemetry.allocations = true;
+		telemetry.host = "localhost";
+		telemetry.app_name = config.name;
+		Reflect.setField (config, "telemetry", telemetry);
+		#end
 		
 		#if (js && html5)
 		#if (munit || utest)
@@ -726,7 +741,7 @@ class ApplicationMain {
 	
 	
 	#if neko
-	@:noCompletion public static function __init__ () {
+	@:noCompletion @:dox(hide) public static function __init__ () {
 		
 		var loader = new neko.vm.Loader (untyped $loader);
 		loader.addPath (haxe.io.Path.directory (Sys.executablePath ()));

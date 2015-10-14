@@ -17,34 +17,34 @@
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="C:\HaxeToolkit\haxe\lib\stablexui\1,1,5\src" />
-    <class path="C:\HaxeToolkit\haxe\lib\actuate\1,8,6" />
     <class path="C:\HaxeToolkit\haxe\lib\away3d\1,1,0" />
     <class path="C:\HaxeToolkit\haxe\lib\openfl\2,2,4" />
-    <class path="C:\HaxeToolkit\haxe\lib\lime\2,4,7" />
-    <class path="C:\HaxeToolkit\haxe\lib\haxeui\1,7,13" />
+    <class path="C:\HaxeToolkit\haxe\lib\lime\2,6,2" />
+    <class path="C:\HaxeToolkit\haxe\lib\hscript\2,0,5" />
+    <class path="C:\HaxeToolkit\haxe\lib\haxeui\1,7,16" />
     <class path="C:\HaxeToolkit\haxe\lib\hscript\2,0,4" />
     <class path="C:\HaxeToolkit\haxe\lib\svg\1,0,8" />
-    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,0,6" />
-    <class path="C:\HaxeToolkit\haxe\lib\actuate\1,8,3" />
+    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,3,1" />
+    <class path="C:\HaxeToolkit\haxe\lib\actuate\1,8,6" />
     <class path="C:\HaxeToolkit\haxe\lib\yagp\1,1,4" />
-    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,1,1" />
+    <class path="C:\HaxeToolkit\haxe\lib\openfl\3,3,3" />
     <class path="C:\HaxeToolkit\haxe\lib\box2d\1,2,3" />
-    <class path="C:\HaxeToolkit\haxe\lib\swf\1,8,9" />
+    <class path="C:\HaxeToolkit\haxe\lib\swf\2,0,2" />
     <class path="C:\HaxeToolkit\haxe\lib\async\0,3,0" />
     <class path="src" />
     <class path="lib\box2d" />
     <class path="lib\vic" />
     <class path="lib\underscore" />
-    <class path="bin\flash\haxe" />
+    <class path="bin\html5\haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="stablexui=1.1.5&#xA;actuate=1.8.6&#xA;away3d=1.1.0&#xA;openfl=2.2.4&#xA;lime=2.4.7&#xA;haxeui=1.7.13&#xA;hscript=2.0.4&#xA;svg=1.0.8&#xA;openfl=3.0.6&#xA;actuate=1.8.3&#xA;yagp=1.1.4&#xA;openfl=3.1.1&#xA;box2d=1.2.3&#xA;swf=1.8.9&#xA;async=0.3.0&#xA;openfl-next&#xA;tools=2.4.7&#xA;no-compilation&#xA;openfl-flash&#xA;web" />
+    <option directives="stablexui=1.1.5&#xA;away3d=1.1.0&#xA;openfl=2.2.4&#xA;lime=2.6.2&#xA;hscript=2.0.5&#xA;haxeui=1.7.16&#xA;hscript=2.0.4&#xA;svg=1.0.8&#xA;openfl=3.3.1&#xA;actuate=1.8.6&#xA;yagp=1.1.4&#xA;openfl=3.3.3&#xA;box2d=1.2.3&#xA;swf=2.0.2&#xA;async=0.3.0&#xA;openfl-next&#xA;tools=2.6.2&#xA;no-compilation&#xA;openfl-html5&#xA;canvas&#xA;lime-html5&#xA;html5&#xA;web&#xA;html5&#xA;display" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
     <option mainClass="ApplicationMain" />
     <option enabledebug="True" />
-    <option additional="-swf-version 11.2" />
+    <option additional="--remap flash:openfl&#xA;--macro allowPackage(&quot;flash&quot;)" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>

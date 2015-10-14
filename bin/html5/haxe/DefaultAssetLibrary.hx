@@ -3,7 +3,9 @@ package;
 
 import haxe.Timer;
 import haxe.Unserializer;
+import lime.app.Future;
 import lime.app.Preloader;
+import lime.app.Promise;
 import lime.audio.AudioSource;
 import lime.audio.openal.AL;
 import lime.audio.AudioBuffer;
@@ -17,11 +19,16 @@ import lime.Assets;
 import sys.FileSystem;
 #end
 
-#if flash
+#if (js && html5)
+import lime.net.URLLoader;
+import lime.net.URLRequest;
+#elseif flash
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.Loader;
 import flash.events.Event;
+import flash.events.IOErrorEvent;
+import flash.events.ProgressEvent;
 import flash.media.Sound;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
@@ -42,6 +49,151 @@ class DefaultAssetLibrary extends AssetLibrary {
 	public function new () {
 		
 		super ();
+		
+		#if (openfl && !flash)
+		
+		openfl.text.Font.registerFont (__ASSET__OPENFL__assets_fonts_oxygen_bold_ttf);
+		openfl.text.Font.registerFont (__ASSET__OPENFL__assets_fonts_oxygen_ttf);
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		openfl.text.Font.registerFont (__ASSET__OPENFL__fonts_oxygen_bold_ttf);
+		openfl.text.Font.registerFont (__ASSET__OPENFL__fonts_oxygen_ttf);
+		
+		
+		
+		#end
 		
 		#if flash
 		
@@ -892,7 +1044,10 @@ class DefaultAssetLibrary extends AssetLibrary {
 		type.set (id, AssetType.TEXT);
 		
 		
-		var assetsPrefix = ApplicationMain.config.assetsPrefix;
+		var assetsPrefix = null;
+		if (ApplicationMain.config != null && Reflect.hasField (ApplicationMain.config, "assetsPrefix")) {
+			assetsPrefix = ApplicationMain.config.assetsPrefix;
+		}
 		if (assetsPrefix != null) {
 			for (k in path.keys()) {
 				path.set(k, assetsPrefix + path[k]);
@@ -900,151 +1055,6 @@ class DefaultAssetLibrary extends AssetLibrary {
 		}
 		
 		#else
-		
-		#if openfl
-		
-		openfl.text.Font.registerFont (__ASSET__OPENFL__assets_fonts_oxygen_bold_ttf);
-		openfl.text.Font.registerFont (__ASSET__OPENFL__assets_fonts_oxygen_ttf);
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		openfl.text.Font.registerFont (__ASSET__OPENFL__fonts_oxygen_bold_ttf);
-		openfl.text.Font.registerFont (__ASSET__OPENFL__fonts_oxygen_ttf);
-		
-		
-		
-		#end
 		
 		#if (windows || mac || linux)
 		
@@ -1490,11 +1500,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 						lastModified = modified;
 						loadManifest ();
 						
-						if (eventCallback != null) {
-							
-							eventCallback (this, "change");
-							
-						}
+						onChange.dispatch ();
 						
 					}
 					
@@ -1605,7 +1611,15 @@ class DefaultAssetLibrary extends AssetLibrary {
 		#elseif html5
 		
 		var bytes:ByteArray = null;
-		var data = Preloader.loaders.get (path.get (id)).data;
+		var loader = Preloader.loaders.get (path.get (id));
+		
+		if (loader == null) {
+			
+			return null;
+			
+		}
+		
+		var data = loader.data;
 		
 		if (Std.is (data, String)) {
 			
@@ -1752,7 +1766,15 @@ class DefaultAssetLibrary extends AssetLibrary {
 		#if html5
 		
 		var bytes:ByteArray = null;
-		var data = Preloader.loaders.get (path.get (id)).data;
+		var loader = Preloader.loaders.get (path.get (id));
+		
+		if (loader == null) {
+			
+			return null;
+			
+		}
+		
+		var data = loader.data;
 		
 		if (Std.is (data, String)) {
 			
@@ -1836,9 +1858,12 @@ class DefaultAssetLibrary extends AssetLibrary {
 	}
 	
 	
-	public override function loadAudioBuffer (id:String, handler:AudioBuffer -> Void):Void {
+	public override function loadAudioBuffer (id:String):Future<AudioBuffer> {
+		
+		var promise = new Promise<AudioBuffer> ();
 		
 		#if (flash)
+		
 		if (path.exists (id)) {
 			
 			var soundLoader = new Sound ();
@@ -1846,24 +1871,45 @@ class DefaultAssetLibrary extends AssetLibrary {
 				
 				var audioBuffer:AudioBuffer = new AudioBuffer();
 				audioBuffer.src = event.currentTarget;
-				handler (audioBuffer);
+				promise.complete (audioBuffer);
 				
 			});
+			soundLoader.addEventListener (ProgressEvent.PROGRESS, function (event) {
+				
+				if (event.bytesTotal == 0) {
+					
+					promise.progress (0);
+					
+				} else {
+					
+					promise.progress (event.bytesLoaded / event.bytesTotal);
+					
+				}
+				
+			});
+			soundLoader.addEventListener (IOErrorEvent.IO_ERROR, promise.error);
 			soundLoader.load (new URLRequest (path.get (id)));
 			
 		} else {
-			handler (getAudioBuffer (id));
+			
+			promise.complete (getAudioBuffer (id));
 			
 		}
+		
 		#else
-		handler (getAudioBuffer (id));
+		
+		promise.completeWith (new Future<AudioBuffer> (function () return getAudioBuffer (id)));
 		
 		#end
+		
+		return promise.future;
 		
 	}
 	
 	
-	public override function loadBytes (id:String, handler:ByteArray -> Void):Void {
+	public override function loadBytes (id:String):Future<ByteArray> {
+		
+		var promise = new Promise<ByteArray> ();
 		
 		#if flash
 		
@@ -1876,27 +1922,82 @@ class DefaultAssetLibrary extends AssetLibrary {
 				bytes.writeUTFBytes (event.currentTarget.data);
 				bytes.position = 0;
 				
-				handler (bytes);
+				promise.complete (bytes);
+				
+			});
+			loader.addEventListener (ProgressEvent.PROGRESS, function (event) {
+				
+				if (event.bytesTotal == 0) {
+					
+					promise.progress (0);
+					
+				} else {
+					
+					promise.progress (event.bytesLoaded / event.bytesTotal);
+					
+				}
+				
+			});
+			loader.addEventListener (IOErrorEvent.IO_ERROR, promise.error);
+			loader.load (new URLRequest (path.get (id)));
+			
+		} else {
+			
+			promise.complete (getBytes (id));
+			
+		}
+		
+		#elseif html5
+		
+		if (path.exists (id)) {
+			
+			var loader = new URLLoader ();
+			loader.dataFormat = BINARY;
+			loader.onComplete.add (function (_):Void {
+				
+				promise.complete (loader.data);
+				
+			});
+			loader.onProgress.add (function (_, loaded, total) {
+				
+				if (total == 0) {
+					
+					promise.progress (0);
+					
+				} else {
+					
+					promise.progress (loaded / total);
+					
+				}
+				
+			});
+			loader.onIOError.add (function (_, e) {
+				
+				promise.error (e);
 				
 			});
 			loader.load (new URLRequest (path.get (id)));
 			
 		} else {
 			
-			handler (getBytes (id));
+			promise.complete (getBytes (id));
 			
 		}
 		
 		#else
 		
-		handler (getBytes (id));
+		promise.completeWith (new Future<ByteArray> (function () return getBytes (id)));
 		
 		#end
+		
+		return promise.future;
 		
 	}
 	
 	
-	public override function loadImage (id:String, handler:Image -> Void):Void {
+	public override function loadImage (id:String):Future<Image> {
+		
+		var promise = new Promise<Image> ();
 		
 		#if flash
 		
@@ -1906,22 +2007,57 @@ class DefaultAssetLibrary extends AssetLibrary {
 			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (event:Event) {
 				
 				var bitmapData = cast (event.currentTarget.content, Bitmap).bitmapData;
-				handler (Image.fromBitmapData (bitmapData));
+				promise.complete (Image.fromBitmapData (bitmapData));
 				
 			});
+			loader.contentLoaderInfo.addEventListener (ProgressEvent.PROGRESS, function (event) {
+				
+				if (event.bytesTotal == 0) {
+					
+					promise.progress (0);
+					
+				} else {
+					
+					promise.progress (event.bytesLoaded / event.bytesTotal);
+					
+				}
+				
+			});
+			loader.contentLoaderInfo.addEventListener (IOErrorEvent.IO_ERROR, promise.error);
 			loader.load (new URLRequest (path.get (id)));
 			
 		} else {
 			
-			handler (getImage (id));
+			promise.complete (getImage (id));
+			
+		}
+		
+		#elseif html5
+		
+		if (path.exists (id)) {
+			
+			var image = new js.html.Image ();
+			image.onload = function (_):Void {
+				
+				promise.complete (Image.fromImageElement (image));
+				
+			}
+			image.onerror = promise.error;
+			image.src = path.get (id);
+			
+		} else {
+			
+			promise.complete (getImage (id));
 			
 		}
 		
 		#else
 		
-		handler (getImage (id));
+		promise.completeWith (new Future<Image> (function () return getImage (id)));
 		
 		#end
+		
+		return promise.future;
 		
 	}
 	
@@ -1992,74 +2128,65 @@ class DefaultAssetLibrary extends AssetLibrary {
 	#end
 	
 	
-	/*public override function loadMusic (id:String, handler:Dynamic -> Void):Void {
+	public override function loadText (id:String):Future<String> {
 		
-		#if (flash || html5)
+		var promise = new Promise<String> ();
 		
-		//if (path.exists (id)) {
-			
-		//	var loader = new Loader ();
-		//	loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (event) {
-				
-		//		handler (cast (event.currentTarget.content, Bitmap).bitmapData);
-				
-		//	});
-		//	loader.load (new URLRequest (path.get (id)));
-			
-		//} else {
-			
-			handler (getMusic (id));
-			
-		//}
+		#if html5
 		
-		#else
-		
-		handler (getMusic (id));
-		
-		#end
-		
-	}*/
-	
-	
-	public override function loadText (id:String, handler:String -> Void):Void {
-		
-		//#if html5
-		
-		/*if (path.exists (id)) {
+		if (path.exists (id)) {
 			
 			var loader = new URLLoader ();
-			loader.addEventListener (Event.COMPLETE, function (event:Event) {
+			loader.onComplete.add (function (_):Void {
 				
-				handler (event.currentTarget.data);
+				promise.complete (loader.data);
 				
 			});
+			loader.onProgress.add (function (_, loaded, total) {
+				
+				if (total == 0) {
+					
+					promise.progress (0);
+					
+				} else {
+					
+					promise.progress (loaded / total);
+					
+				}
+				
+			});
+			loader.onIOError.add (function (_, msg) promise.error (msg));
 			loader.load (new URLRequest (path.get (id)));
 			
 		} else {
 			
-			handler (getText (id));
-			
-		}*/
-		
-		//#else
-		
-		var callback = function (bytes:ByteArray):Void {
-			
-			if (bytes == null) {
-				
-				handler (null);
-				
-			} else {
-				
-				handler (bytes.readUTFBytes (bytes.length));
-				
-			}
+			promise.complete (getText (id));
 			
 		}
 		
-		loadBytes (id, callback);
+		#else
 		
-		//#end
+		promise.completeWith (loadBytes (id).then (function (bytes) {
+			
+			return new Future<String> (function () {
+				
+				if (bytes == null) {
+					
+					return null;
+					
+				} else {
+					
+					return bytes.readUTFBytes (bytes.length);
+					
+				}
+				
+			});
+			
+		}));
+		
+		#end
+		
+		return promise.future;
 		
 	}
 	
@@ -2360,162 +2487,161 @@ class DefaultAssetLibrary extends AssetLibrary {
 
 
 
-#if (windows || mac || linux)
+#if (windows || mac || linux || cpp)
 
 
-@:font("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/fonts/Oxygen-Bold.ttf") #if display private #end class __ASSET__assets_fonts_oxygen_bold_ttf extends lime.text.Font {}
-@:font("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/fonts/Oxygen.ttf") #if display private #end class __ASSET__assets_fonts_oxygen_ttf extends lime.text.Font {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/circle.png") #if display private #end class __ASSET__assets_styles_default_circle_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/collapse.png") #if display private #end class __ASSET__assets_styles_default_collapse_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/cross.png") #if display private #end class __ASSET__assets_styles_default_cross_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/expand.png") #if display private #end class __ASSET__assets_styles_default_expand_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/up_down.png") #if display private #end class __ASSET__assets_styles_default_up_down_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_down.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_down_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_down_dark.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_down_dark_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_down_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_down_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_left.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_left_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_left_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_left_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_right.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_right_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_right2.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_right2_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_right_dark.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_right_dark_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_right_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_right_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_up.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_up_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_up_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_up_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/circle_dark.png") #if display private #end class __ASSET__assets_styles_gradient_circle_dark_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/cross_dark.png") #if display private #end class __ASSET__assets_styles_gradient_cross_dark_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/cross_dark_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_cross_dark_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/cross_light_small.png") #if display private #end class __ASSET__assets_styles_gradient_cross_light_small_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gradient.css") #if display private #end class __ASSET__assets_styles_gradient_gradient_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gradient.min.css") #if display private #end class __ASSET__assets_styles_gradient_gradient_min_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gradient_mobile.css") #if display private #end class __ASSET__assets_styles_gradient_gradient_mobile_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gradient_mobile.min.css") #if display private #end class __ASSET__assets_styles_gradient_gradient_mobile_min_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gripper_horizontal.png") #if display private #end class __ASSET__assets_styles_gradient_gripper_horizontal_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gripper_horizontal_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_gripper_horizontal_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gripper_vertical.png") #if display private #end class __ASSET__assets_styles_gradient_gripper_vertical_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gripper_vertical_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_gripper_vertical_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/hsplitter_gripper.png") #if display private #end class __ASSET__assets_styles_gradient_hsplitter_gripper_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/vsplitter_gripper.png") #if display private #end class __ASSET__assets_styles_gradient_vsplitter_gripper_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/accordion.css") #if display private #end class __ASSET__assets_styles_windows_accordion_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/accordion.min.css") #if display private #end class __ASSET__assets_styles_windows_accordion_min_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/button.png") #if display private #end class __ASSET__assets_styles_windows_button_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/buttons.css") #if display private #end class __ASSET__assets_styles_windows_buttons_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/buttons.min.css") #if display private #end class __ASSET__assets_styles_windows_buttons_min_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/calendar.css") #if display private #end class __ASSET__assets_styles_windows_calendar_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/checkbox.png") #if display private #end class __ASSET__assets_styles_windows_checkbox_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/container.png") #if display private #end class __ASSET__assets_styles_windows_container_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/down_arrow.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_down_arrow_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/hscroll_thumb_gripper_down.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_hscroll_thumb_gripper_down_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/hscroll_thumb_gripper_over.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_hscroll_thumb_gripper_over_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/hscroll_thumb_gripper_up.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_hscroll_thumb_gripper_up_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/left_arrow.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_left_arrow_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/right_arrow.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_right_arrow_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/up_arrow.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_up_arrow_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/vscroll_thumb_gripper_down.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_vscroll_thumb_gripper_down_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/vscroll_thumb_gripper_over.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_vscroll_thumb_gripper_over_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/vscroll_thumb_gripper_up.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_vscroll_thumb_gripper_up_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/hprogress.png") #if display private #end class __ASSET__assets_styles_windows_hprogress_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/hscroll.png") #if display private #end class __ASSET__assets_styles_windows_hscroll_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/listview.css") #if display private #end class __ASSET__assets_styles_windows_listview_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/listview.min.css") #if display private #end class __ASSET__assets_styles_windows_listview_min_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/listview.png") #if display private #end class __ASSET__assets_styles_windows_listview_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/menus.css") #if display private #end class __ASSET__assets_styles_windows_menus_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/optionbox.png") #if display private #end class __ASSET__assets_styles_windows_optionbox_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/popup.png") #if display private #end class __ASSET__assets_styles_windows_popup_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/popups.css") #if display private #end class __ASSET__assets_styles_windows_popups_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/rtf.css") #if display private #end class __ASSET__assets_styles_windows_rtf_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/scrolls.css") #if display private #end class __ASSET__assets_styles_windows_scrolls_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/scrolls.min.css") #if display private #end class __ASSET__assets_styles_windows_scrolls_min_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/sliders.css") #if display private #end class __ASSET__assets_styles_windows_sliders_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/tab.png") #if display private #end class __ASSET__assets_styles_windows_tab_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/tabs.css") #if display private #end class __ASSET__assets_styles_windows_tabs_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/textinput.png") #if display private #end class __ASSET__assets_styles_windows_textinput_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/vprogress.png") #if display private #end class __ASSET__assets_styles_windows_vprogress_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/vscroll.png") #if display private #end class __ASSET__assets_styles_windows_vscroll_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/windows.css") #if display private #end class __ASSET__assets_styles_windows_windows_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/circle.png") #if display private #end class __ASSET__styles_default_circle_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/collapse.png") #if display private #end class __ASSET__styles_default_collapse_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/cross.png") #if display private #end class __ASSET__styles_default_cross_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/expand.png") #if display private #end class __ASSET__styles_default_expand_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/default/up_down.png") #if display private #end class __ASSET__styles_default_up_down_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_down.png") #if display private #end class __ASSET__styles_gradient_arrow_down_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_down_dark.png") #if display private #end class __ASSET__styles_gradient_arrow_down_dark_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_down_disabled.png") #if display private #end class __ASSET__styles_gradient_arrow_down_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_left.png") #if display private #end class __ASSET__styles_gradient_arrow_left_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_left_disabled.png") #if display private #end class __ASSET__styles_gradient_arrow_left_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_right.png") #if display private #end class __ASSET__styles_gradient_arrow_right_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_right2.png") #if display private #end class __ASSET__styles_gradient_arrow_right2_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_right_dark.png") #if display private #end class __ASSET__styles_gradient_arrow_right_dark_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_right_disabled.png") #if display private #end class __ASSET__styles_gradient_arrow_right_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_up.png") #if display private #end class __ASSET__styles_gradient_arrow_up_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/arrow_up_disabled.png") #if display private #end class __ASSET__styles_gradient_arrow_up_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/circle_dark.png") #if display private #end class __ASSET__styles_gradient_circle_dark_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/cross_dark.png") #if display private #end class __ASSET__styles_gradient_cross_dark_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/cross_dark_disabled.png") #if display private #end class __ASSET__styles_gradient_cross_dark_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/cross_light_small.png") #if display private #end class __ASSET__styles_gradient_cross_light_small_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gradient.css") #if display private #end class __ASSET__styles_gradient_gradient_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gradient.min.css") #if display private #end class __ASSET__styles_gradient_gradient_min_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gradient_mobile.css") #if display private #end class __ASSET__styles_gradient_gradient_mobile_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gradient_mobile.min.css") #if display private #end class __ASSET__styles_gradient_gradient_mobile_min_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gripper_horizontal.png") #if display private #end class __ASSET__styles_gradient_gripper_horizontal_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gripper_horizontal_disabled.png") #if display private #end class __ASSET__styles_gradient_gripper_horizontal_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gripper_vertical.png") #if display private #end class __ASSET__styles_gradient_gripper_vertical_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/gripper_vertical_disabled.png") #if display private #end class __ASSET__styles_gradient_gripper_vertical_disabled_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/hsplitter_gripper.png") #if display private #end class __ASSET__styles_gradient_hsplitter_gripper_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/gradient/vsplitter_gripper.png") #if display private #end class __ASSET__styles_gradient_vsplitter_gripper_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/accordion.css") #if display private #end class __ASSET__styles_windows_accordion_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/accordion.min.css") #if display private #end class __ASSET__styles_windows_accordion_min_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/button.png") #if display private #end class __ASSET__styles_windows_button_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/buttons.css") #if display private #end class __ASSET__styles_windows_buttons_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/buttons.min.css") #if display private #end class __ASSET__styles_windows_buttons_min_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/calendar.css") #if display private #end class __ASSET__styles_windows_calendar_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/checkbox.png") #if display private #end class __ASSET__styles_windows_checkbox_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/container.png") #if display private #end class __ASSET__styles_windows_container_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/down_arrow.png") #if display private #end class __ASSET__styles_windows_glyphs_down_arrow_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/hscroll_thumb_gripper_down.png") #if display private #end class __ASSET__styles_windows_glyphs_hscroll_thumb_gripper_down_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/hscroll_thumb_gripper_over.png") #if display private #end class __ASSET__styles_windows_glyphs_hscroll_thumb_gripper_over_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/hscroll_thumb_gripper_up.png") #if display private #end class __ASSET__styles_windows_glyphs_hscroll_thumb_gripper_up_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/left_arrow.png") #if display private #end class __ASSET__styles_windows_glyphs_left_arrow_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/right_arrow.png") #if display private #end class __ASSET__styles_windows_glyphs_right_arrow_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/up_arrow.png") #if display private #end class __ASSET__styles_windows_glyphs_up_arrow_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/vscroll_thumb_gripper_down.png") #if display private #end class __ASSET__styles_windows_glyphs_vscroll_thumb_gripper_down_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/vscroll_thumb_gripper_over.png") #if display private #end class __ASSET__styles_windows_glyphs_vscroll_thumb_gripper_over_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/glyphs/vscroll_thumb_gripper_up.png") #if display private #end class __ASSET__styles_windows_glyphs_vscroll_thumb_gripper_up_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/hprogress.png") #if display private #end class __ASSET__styles_windows_hprogress_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/hscroll.png") #if display private #end class __ASSET__styles_windows_hscroll_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/listview.css") #if display private #end class __ASSET__styles_windows_listview_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/listview.min.css") #if display private #end class __ASSET__styles_windows_listview_min_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/listview.png") #if display private #end class __ASSET__styles_windows_listview_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/menus.css") #if display private #end class __ASSET__styles_windows_menus_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/optionbox.png") #if display private #end class __ASSET__styles_windows_optionbox_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/popup.png") #if display private #end class __ASSET__styles_windows_popup_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/popups.css") #if display private #end class __ASSET__styles_windows_popups_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/rtf.css") #if display private #end class __ASSET__styles_windows_rtf_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/scrolls.css") #if display private #end class __ASSET__styles_windows_scrolls_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/scrolls.min.css") #if display private #end class __ASSET__styles_windows_scrolls_min_css extends lime.utils.ByteArray {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/sliders.css") #if display private #end class __ASSET__styles_windows_sliders_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/tab.png") #if display private #end class __ASSET__styles_windows_tab_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/tabs.css") #if display private #end class __ASSET__styles_windows_tabs_css extends lime.utils.ByteArray {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/textinput.png") #if display private #end class __ASSET__styles_windows_textinput_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/vprogress.png") #if display private #end class __ASSET__styles_windows_vprogress_png extends lime.graphics.Image {}
-@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/vscroll.png") #if display private #end class __ASSET__styles_windows_vscroll_png extends lime.graphics.Image {}
-@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/styles/windows/windows.css") #if display private #end class __ASSET__styles_windows_windows_css extends lime.utils.ByteArray {}
-@:font("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/fonts/Oxygen-Bold.ttf") #if display private #end class __ASSET__fonts_oxygen_bold_ttf extends lime.text.Font {}
-@:font("C:/HaxeToolkit/haxe/lib/haxeui/1,7,13/assets/fonts/Oxygen.ttf") #if display private #end class __ASSET__fonts_oxygen_ttf extends lime.text.Font {}
-@:file("C:/Users/viyu.LL/Documents/vic/flashDevelop/testOpenFL3/bin/html5/obj/libraries/swfsrc/swfsrc.dat") #if display private #end class __ASSET__libraries_swfsrc_swfsrc_dat extends lime.utils.ByteArray {}
-@:file("C:/Users/viyu.LL/Documents/vic/flashDevelop/testOpenFL3/bin/html5/obj/libraries/swfsrc.json") #if display private #end class __ASSET__libraries_swfsrc_json extends lime.utils.ByteArray {}
+@:font("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/fonts/Oxygen-Bold.ttf") #if display private #end class __ASSET__assets_fonts_oxygen_bold_ttf extends lime.text.Font {}
+@:font("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/fonts/Oxygen.ttf") #if display private #end class __ASSET__assets_fonts_oxygen_ttf extends lime.text.Font {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/circle.png") #if display private #end class __ASSET__assets_styles_default_circle_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/collapse.png") #if display private #end class __ASSET__assets_styles_default_collapse_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/cross.png") #if display private #end class __ASSET__assets_styles_default_cross_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/expand.png") #if display private #end class __ASSET__assets_styles_default_expand_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/up_down.png") #if display private #end class __ASSET__assets_styles_default_up_down_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_down.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_down_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_down_dark.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_down_dark_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_down_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_down_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_left.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_left_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_left_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_left_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_right.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_right_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_right2.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_right2_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_right_dark.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_right_dark_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_right_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_right_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_up.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_up_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_up_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_arrow_up_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/circle_dark.png") #if display private #end class __ASSET__assets_styles_gradient_circle_dark_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/cross_dark.png") #if display private #end class __ASSET__assets_styles_gradient_cross_dark_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/cross_dark_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_cross_dark_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/cross_light_small.png") #if display private #end class __ASSET__assets_styles_gradient_cross_light_small_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gradient.css") #if display private #end class __ASSET__assets_styles_gradient_gradient_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gradient.min.css") #if display private #end class __ASSET__assets_styles_gradient_gradient_min_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gradient_mobile.css") #if display private #end class __ASSET__assets_styles_gradient_gradient_mobile_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gradient_mobile.min.css") #if display private #end class __ASSET__assets_styles_gradient_gradient_mobile_min_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gripper_horizontal.png") #if display private #end class __ASSET__assets_styles_gradient_gripper_horizontal_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gripper_horizontal_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_gripper_horizontal_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gripper_vertical.png") #if display private #end class __ASSET__assets_styles_gradient_gripper_vertical_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gripper_vertical_disabled.png") #if display private #end class __ASSET__assets_styles_gradient_gripper_vertical_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/hsplitter_gripper.png") #if display private #end class __ASSET__assets_styles_gradient_hsplitter_gripper_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/vsplitter_gripper.png") #if display private #end class __ASSET__assets_styles_gradient_vsplitter_gripper_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/accordion.css") #if display private #end class __ASSET__assets_styles_windows_accordion_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/accordion.min.css") #if display private #end class __ASSET__assets_styles_windows_accordion_min_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/button.png") #if display private #end class __ASSET__assets_styles_windows_button_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/buttons.css") #if display private #end class __ASSET__assets_styles_windows_buttons_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/buttons.min.css") #if display private #end class __ASSET__assets_styles_windows_buttons_min_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/calendar.css") #if display private #end class __ASSET__assets_styles_windows_calendar_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/checkbox.png") #if display private #end class __ASSET__assets_styles_windows_checkbox_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/container.png") #if display private #end class __ASSET__assets_styles_windows_container_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/down_arrow.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_down_arrow_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/hscroll_thumb_gripper_down.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_hscroll_thumb_gripper_down_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/hscroll_thumb_gripper_over.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_hscroll_thumb_gripper_over_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/hscroll_thumb_gripper_up.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_hscroll_thumb_gripper_up_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/left_arrow.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_left_arrow_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/right_arrow.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_right_arrow_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/up_arrow.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_up_arrow_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/vscroll_thumb_gripper_down.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_vscroll_thumb_gripper_down_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/vscroll_thumb_gripper_over.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_vscroll_thumb_gripper_over_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/vscroll_thumb_gripper_up.png") #if display private #end class __ASSET__assets_styles_windows_glyphs_vscroll_thumb_gripper_up_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/hprogress.png") #if display private #end class __ASSET__assets_styles_windows_hprogress_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/hscroll.png") #if display private #end class __ASSET__assets_styles_windows_hscroll_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/listview.css") #if display private #end class __ASSET__assets_styles_windows_listview_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/listview.min.css") #if display private #end class __ASSET__assets_styles_windows_listview_min_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/listview.png") #if display private #end class __ASSET__assets_styles_windows_listview_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/menus.css") #if display private #end class __ASSET__assets_styles_windows_menus_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/optionbox.png") #if display private #end class __ASSET__assets_styles_windows_optionbox_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/popup.png") #if display private #end class __ASSET__assets_styles_windows_popup_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/popups.css") #if display private #end class __ASSET__assets_styles_windows_popups_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/rtf.css") #if display private #end class __ASSET__assets_styles_windows_rtf_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/scrolls.css") #if display private #end class __ASSET__assets_styles_windows_scrolls_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/scrolls.min.css") #if display private #end class __ASSET__assets_styles_windows_scrolls_min_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/sliders.css") #if display private #end class __ASSET__assets_styles_windows_sliders_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/tab.png") #if display private #end class __ASSET__assets_styles_windows_tab_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/tabs.css") #if display private #end class __ASSET__assets_styles_windows_tabs_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/textinput.png") #if display private #end class __ASSET__assets_styles_windows_textinput_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/vprogress.png") #if display private #end class __ASSET__assets_styles_windows_vprogress_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/vscroll.png") #if display private #end class __ASSET__assets_styles_windows_vscroll_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/windows.css") #if display private #end class __ASSET__assets_styles_windows_windows_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/circle.png") #if display private #end class __ASSET__styles_default_circle_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/collapse.png") #if display private #end class __ASSET__styles_default_collapse_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/cross.png") #if display private #end class __ASSET__styles_default_cross_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/expand.png") #if display private #end class __ASSET__styles_default_expand_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/default/up_down.png") #if display private #end class __ASSET__styles_default_up_down_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_down.png") #if display private #end class __ASSET__styles_gradient_arrow_down_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_down_dark.png") #if display private #end class __ASSET__styles_gradient_arrow_down_dark_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_down_disabled.png") #if display private #end class __ASSET__styles_gradient_arrow_down_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_left.png") #if display private #end class __ASSET__styles_gradient_arrow_left_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_left_disabled.png") #if display private #end class __ASSET__styles_gradient_arrow_left_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_right.png") #if display private #end class __ASSET__styles_gradient_arrow_right_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_right2.png") #if display private #end class __ASSET__styles_gradient_arrow_right2_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_right_dark.png") #if display private #end class __ASSET__styles_gradient_arrow_right_dark_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_right_disabled.png") #if display private #end class __ASSET__styles_gradient_arrow_right_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_up.png") #if display private #end class __ASSET__styles_gradient_arrow_up_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/arrow_up_disabled.png") #if display private #end class __ASSET__styles_gradient_arrow_up_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/circle_dark.png") #if display private #end class __ASSET__styles_gradient_circle_dark_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/cross_dark.png") #if display private #end class __ASSET__styles_gradient_cross_dark_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/cross_dark_disabled.png") #if display private #end class __ASSET__styles_gradient_cross_dark_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/cross_light_small.png") #if display private #end class __ASSET__styles_gradient_cross_light_small_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gradient.css") #if display private #end class __ASSET__styles_gradient_gradient_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gradient.min.css") #if display private #end class __ASSET__styles_gradient_gradient_min_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gradient_mobile.css") #if display private #end class __ASSET__styles_gradient_gradient_mobile_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gradient_mobile.min.css") #if display private #end class __ASSET__styles_gradient_gradient_mobile_min_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gripper_horizontal.png") #if display private #end class __ASSET__styles_gradient_gripper_horizontal_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gripper_horizontal_disabled.png") #if display private #end class __ASSET__styles_gradient_gripper_horizontal_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gripper_vertical.png") #if display private #end class __ASSET__styles_gradient_gripper_vertical_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/gripper_vertical_disabled.png") #if display private #end class __ASSET__styles_gradient_gripper_vertical_disabled_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/hsplitter_gripper.png") #if display private #end class __ASSET__styles_gradient_hsplitter_gripper_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/gradient/vsplitter_gripper.png") #if display private #end class __ASSET__styles_gradient_vsplitter_gripper_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/accordion.css") #if display private #end class __ASSET__styles_windows_accordion_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/accordion.min.css") #if display private #end class __ASSET__styles_windows_accordion_min_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/button.png") #if display private #end class __ASSET__styles_windows_button_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/buttons.css") #if display private #end class __ASSET__styles_windows_buttons_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/buttons.min.css") #if display private #end class __ASSET__styles_windows_buttons_min_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/calendar.css") #if display private #end class __ASSET__styles_windows_calendar_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/checkbox.png") #if display private #end class __ASSET__styles_windows_checkbox_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/container.png") #if display private #end class __ASSET__styles_windows_container_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/down_arrow.png") #if display private #end class __ASSET__styles_windows_glyphs_down_arrow_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/hscroll_thumb_gripper_down.png") #if display private #end class __ASSET__styles_windows_glyphs_hscroll_thumb_gripper_down_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/hscroll_thumb_gripper_over.png") #if display private #end class __ASSET__styles_windows_glyphs_hscroll_thumb_gripper_over_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/hscroll_thumb_gripper_up.png") #if display private #end class __ASSET__styles_windows_glyphs_hscroll_thumb_gripper_up_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/left_arrow.png") #if display private #end class __ASSET__styles_windows_glyphs_left_arrow_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/right_arrow.png") #if display private #end class __ASSET__styles_windows_glyphs_right_arrow_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/up_arrow.png") #if display private #end class __ASSET__styles_windows_glyphs_up_arrow_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/vscroll_thumb_gripper_down.png") #if display private #end class __ASSET__styles_windows_glyphs_vscroll_thumb_gripper_down_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/vscroll_thumb_gripper_over.png") #if display private #end class __ASSET__styles_windows_glyphs_vscroll_thumb_gripper_over_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/glyphs/vscroll_thumb_gripper_up.png") #if display private #end class __ASSET__styles_windows_glyphs_vscroll_thumb_gripper_up_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/hprogress.png") #if display private #end class __ASSET__styles_windows_hprogress_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/hscroll.png") #if display private #end class __ASSET__styles_windows_hscroll_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/listview.css") #if display private #end class __ASSET__styles_windows_listview_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/listview.min.css") #if display private #end class __ASSET__styles_windows_listview_min_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/listview.png") #if display private #end class __ASSET__styles_windows_listview_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/menus.css") #if display private #end class __ASSET__styles_windows_menus_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/optionbox.png") #if display private #end class __ASSET__styles_windows_optionbox_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/popup.png") #if display private #end class __ASSET__styles_windows_popup_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/popups.css") #if display private #end class __ASSET__styles_windows_popups_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/rtf.css") #if display private #end class __ASSET__styles_windows_rtf_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/scrolls.css") #if display private #end class __ASSET__styles_windows_scrolls_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/scrolls.min.css") #if display private #end class __ASSET__styles_windows_scrolls_min_css extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/sliders.css") #if display private #end class __ASSET__styles_windows_sliders_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/tab.png") #if display private #end class __ASSET__styles_windows_tab_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/tabs.css") #if display private #end class __ASSET__styles_windows_tabs_css extends lime.utils.ByteArray {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/textinput.png") #if display private #end class __ASSET__styles_windows_textinput_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/vprogress.png") #if display private #end class __ASSET__styles_windows_vprogress_png extends lime.graphics.Image {}
+@:image("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/vscroll.png") #if display private #end class __ASSET__styles_windows_vscroll_png extends lime.graphics.Image {}
+@:file("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/styles/windows/windows.css") #if display private #end class __ASSET__styles_windows_windows_css extends lime.utils.ByteArray {}
+@:font("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/fonts/Oxygen-Bold.ttf") #if display private #end class __ASSET__fonts_oxygen_bold_ttf extends lime.text.Font {}
+@:font("C:/HaxeToolkit/haxe/lib/haxeui/1,7,16/assets/fonts/Oxygen.ttf") #if display private #end class __ASSET__fonts_oxygen_ttf extends lime.text.Font {}
+@:file("C:/Users/Vic/Documents/Custom/Server/git/openfl_test/bin/html5/obj/libraries/swfsrc/swfsrc.dat") #if display private #end class __ASSET__libraries_swfsrc_swfsrc_dat extends lime.utils.ByteArray {}
+@:file("C:/Users/Vic/Documents/Custom/Server/git/openfl_test/bin/html5/obj/libraries/swfsrc.json") #if display private #end class __ASSET__libraries_swfsrc_json extends lime.utils.ByteArray {}
 
 
-
-#end
-
-#if openfl
-@:keep #if display private #end class __ASSET__OPENFL__assets_fonts_oxygen_bold_ttf extends openfl.text.Font { public function new () { __fontPath = "assets/fonts/Oxygen-Bold"; name = "Oxygen Bold"; super (); }}
-@:keep #if display private #end class __ASSET__OPENFL__assets_fonts_oxygen_ttf extends openfl.text.Font { public function new () { __fontPath = "assets/fonts/Oxygen"; name = "Oxygen Regular"; super (); }}
-@:keep #if display private #end class __ASSET__OPENFL__fonts_oxygen_bold_ttf extends openfl.text.Font { public function new () { __fontPath = "fonts/Oxygen-Bold"; name = "Oxygen Bold"; super (); }}
-@:keep #if display private #end class __ASSET__OPENFL__fonts_oxygen_ttf extends openfl.text.Font { public function new () { __fontPath = "fonts/Oxygen"; name = "Oxygen Regular"; super (); }}
-
-#end
 
 #end
 #end
 
+#if (openfl && !flash)
+@:keep #if display private #end class __ASSET__OPENFL__assets_fonts_oxygen_bold_ttf extends openfl.text.Font { public function new () { var font = new __ASSET__assets_fonts_oxygen_bold_ttf (); src = font.src; name = font.name; super (); }}
+@:keep #if display private #end class __ASSET__OPENFL__assets_fonts_oxygen_ttf extends openfl.text.Font { public function new () { var font = new __ASSET__assets_fonts_oxygen_ttf (); src = font.src; name = font.name; super (); }}
+@:keep #if display private #end class __ASSET__OPENFL__fonts_oxygen_bold_ttf extends openfl.text.Font { public function new () { var font = new __ASSET__fonts_oxygen_bold_ttf (); src = font.src; name = font.name; super (); }}
+@:keep #if display private #end class __ASSET__OPENFL__fonts_oxygen_ttf extends openfl.text.Font { public function new () { var font = new __ASSET__fonts_oxygen_ttf (); src = font.src; name = font.name; super (); }}
+
+#end
+
+#end
